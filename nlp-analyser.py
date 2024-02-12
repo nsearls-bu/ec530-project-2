@@ -38,13 +38,5 @@ def create_response(user_uid, document_id):
     def web_search():
         '''Crafts a google search based on a keywords, summary, and article title - returns web links'''
 
-def create_document():
-    '''Write to document table
-    document_id : id,
-    full_text: {paragraph_1: paragraph_1_text ...}
-    '''
-    def split_paragraphs():
-        '''Splits paragraphs by AI or just analysis of newlines'''
-        pass
 def search_document(document_id, keyword):
     '''Searches documents and returns paragraph of document that best fits keyword'''
