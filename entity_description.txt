@@ -1,0 +1,32 @@
+table USERS
+    user_id pkey
+    username
+    firstname
+    lastname
+    cell
+    email
+    password
+    age
+table DOCUMENTS
+    document_id pkey
+    user_id fkey
+    uploaded_on
+    fulltext
+table PARAGRAPHS
+    document_id
+    paragraph_id
+    text
+table CONNECTIONS
+    connection_name
+    connection_type
+    connection_url
+    connection_id pkey
+    user_id fkey
+table NLP_RESPONSE
+    response_id pkey
+    user_id fkey
+    document_id fkey
+    title_summary
+    sentiment_score
+    keywords
+    similar_articles
