@@ -1,5 +1,8 @@
 '''Does basic NLP analysis of text input'''
+from flask import Blueprint
 
+analyser_bp = Blueprint('analyser_bp', __name__)
+@analyser_bp.route('create_engine', methods=['PUT'])
 def create_engine_connection(name, url):
     '''
     Connects to container managing NLP processing or website API
@@ -9,6 +12,7 @@ def create_engine_connection(name, url):
     writes to connection table in table
     '''
 
+@analyser_bp.route('/create_response', methods=['GET'])
 def create_response(user_uid, document_id):
     '''
     Creates summary text from AI based NLP program
@@ -38,5 +42,7 @@ def create_response(user_uid, document_id):
     def web_search():
         '''Crafts a google search based on a keywords, summary, and article title - returns web links'''
 
+
+@analyser_bp.route('search_document', methods=['GET'])
 def search_document(document_id, keyword):
     '''Searches documents and returns paragraph of document that best fits keyword'''

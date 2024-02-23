@@ -1,0 +1,21 @@
+openapi: 3.1.0
+info:
+  title: API for smart file ingestion project 2 for EC530
+  version: 0.0.1
+paths:
+  /response:
+    summary: Generate response from GPT
+    responses:
+      '200':
+        content:
+          application/json:
+            schema:
+              type: object
+            properties:
+              user_uid
+              document_id
+              title
+              summary
+              sentiment
+              keyword
+              similar_articles

@@ -1,5 +1,8 @@
 '''This module manages uploading and ingestion of files/pdfs'''
+from flask import Blueprint
 
+document_db = Blueprint('document_db', __name__)
+@document_db.route('/create_document')
 def create_document():
     '''Recieves document as pdf, etc, or as URL/html and parses into text, uploading to document db'''
     def parse_pdf():

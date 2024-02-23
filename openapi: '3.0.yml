@@ -1,0 +1,53 @@
+openapi: '3.0.2'
+info:
+  title: API for smart file ingestion project 2 for EC530
+  version: 0.0.1
+paths:
+  /response:
+    get:
+      summary: Generate response from GPT
+      responses:
+        '200':
+          description: A json object of the response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_uid:
+                    type: integer
+                  document_id:
+                    type: integer
+                  title:
+                    type: string
+                  summary:
+                    type: string
+                  sentiment:
+                    type: string
+                  keyword:
+                    type: array
+                  similar_articles:
+                    type: array
+  /create_engine:
+    post:
+      responses:
+        '201':
+          description: A connection object
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  connection_url:
+                    type: string
+                  connection_type:
+                    type: string
+                  connection_name:
+                    type: string
+                  api_username:
+                    type: string
+                  api_password:
+                    type: string
+        '422':
+          description: Invalid connection
+      
