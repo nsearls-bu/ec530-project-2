@@ -5,6 +5,7 @@ from modules.user_management import user_management_bp
 from modules.output import output_bp
 from modules.document_uploader import document_db
 from modules.nlp_analyser import analyser_bp
+from modules.connections import connection_bp
 
 
 
@@ -15,6 +16,8 @@ def create_flask_app():
     flask_app.register_blueprint(output_bp)
     flask_app.register_blueprint(document_db)
     flask_app.register_blueprint(analyser_bp)
+    flask_app.register_blueprint(connection_bp)
+
     CORS(flask_app)
     flask_app.config['CORS_HEADERS'] = 'Content-Type'
     return flask_app

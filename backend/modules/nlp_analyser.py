@@ -1,76 +1,25 @@
 '''Does basic NLP analysis of text input'''
 from uuid import uuid4, UUID
 from flask import Blueprint, request
-from modules.tables import Connections, NLP_Response
-
-
-analyser_bp = Blueprint('analyser_bp', __name__)
-
+from modules.tables import Connections, NLP_Response, Documents
 from session_factory import get_my_session
+from task_queue.bridge import rabbitmq_client, redis_client
+from pika import BasicProperties
+import uuid
+import pickle
+from pydantic import BaseModel
 
-@analyser_bp.route('/create_engine', methods=['PUT'])
-def create_engine_connection():
-    '''
-    Connects to container managing NLP processing or website API
-    {'connection_name' : name
-    connection_url: url
-    connection_type: website API or other NLP processor}
-    writes to connection table in table
-    '''
 
-    connection_name = request.args.get('name', type=str)
-    url = request.args.get('url_name', type=str)
-    connection_uid = uuid4()
-
-    session = get_my_session()
-
-    new_connection = Connections(id=connection_uid, connection_name=connection_name, url=url)
-    session.add(new_connection)
-    session.commit()
-    res = session.refresh(new_connection)
-    session.close()
-
-    if res is not None:
-        return res, 200
-    return res, 400
-
+class PendingTask(BaseModel):
+    task_id: str
+class ResultTask(BaseModel):
+    output: str
 
 analyser_bp = Blueprint('analyser_bp', __name__)
 
 
-@analyser_bp.route('/remove_engine', methods=['PUT'])
-def remote_engine_connection(name, url):
-    '''
-    Connects to container managing NLP processing or website API
-    {'connection_name' : name
-    connection_url: url
-    connection_type: website API or other NLP processor}
-    writes to connection table in table
-    '''
-    connection_uid = request.args.get('connection_uid', type=UUID)
-
-    if not connection_uid:
-        return 'Connection UID is required', 400
-
-    try:
-        # Attempt to delete the connection from the database
-        session = get_my_session()  # Assuming you have the session created as shown in the previous example
-        connection = session.query(Connections).filter_by(id=connection_uid).first()
-
-        if connection:
-            # Using SQLAlchemy query to delete the connection
-            session.query(Connections).filter_by(id=connection_uid).delete()
-            session.commit()
-            session.close()
-            return 'Old connection deleted successfully', 204
-        else:
-            return 'Connection not found', 404
-    except Exception as e:
-        return f'Error deleting connection: {str(e)}', 500
-
-
-@analyser_bp.route('/create_response', methods=['GET'])
-def create_response():
+@analyser_bp.route('/create_response', methods=['POST'])
+async def create_response():
     '''
     Creates summary text from AI based NLP program
     returns:
@@ -85,16 +34,30 @@ def create_response():
         }
     writes to response table in db
     '''
-    uid = request.args.get('uid', type=UUID)
+    user_id = request.args.get('user_id', type=UUID)
     document_id = request.args.get('document_id', type=UUID)
-
-    document_text = 'QUERY document db with document id'
-
+    try:
+        with get_my_session() as session:
+            document_text = session.query(Documents).filter_by(
+                document_id=document_id).first()
+    except Exception as e:
+        return f'Error reading responses: {str(e)}', 500
+    if document_text is None:
+        return "Document not found", 404
     # Input text fetched from document table
 
     def generate_summary(document_text):
-        '''Uses prompt like "generate a summary of the following text"'''
-        return None
+        task_id = str(uuid.uuid4())
+
+        rabbitmq_client.basic_publish(
+            exchange='',  # default exchange
+            routing_key='project2_queue',
+            body=pickle.dumps(document_text),
+            properties=BasicProperties(headers={'task_id': task_id})
+        )
+
+        return PendingTask(task_id=task_id)
+
     def title_summary(document_text):
         '''Generate a single sentence summary'''
         return None
@@ -121,25 +84,37 @@ def create_response():
     # sentiment = generate_sentiment(document_text)
     # keywords = keyword_analysis(document_text)
     # similar_articles = web_search()
+    summary_task = generate_summary(document_text.fulltext)
+
     title = None
     summary = None
     sentiment = None
     keywords = None
     similar_articles = None
+    # We'll create some kind of poll to the worker and generate all of these tasks
     # Write the response to the database
     try:
         session = get_my_session()
         response = NLP_Response(
-            user_uid=uid,
+            user_id=user_id,
             document_id=document_id,
-            title=title,
-            summary=summary,
-            sentiment=sentiment,
+            title_summary=summary,
+            sentiment_score=sentiment,
             keywords=keywords,
             similar_articles=similar_articles
         )
         session.add(response)
         session.commit()
-        return 'Response created successfully', 200
+        return {"summary_task": summary_task.model_dump(mode='json')}, 201
     except Exception as e:
         return f'Error creating response: {str(e)}', 500
+
+
+
+@analyser_bp.route("/results/<task_id>")
+async def nlp_results(task_id):
+    '''Returns pending if not complete, or the result if done'''
+    if not redis_client.exists(task_id):
+        return PendingTask(task_id=task_id).model_dump()
+    result = redis_client.get(task_id)
+    return ResultTask(output=result).model_dump()

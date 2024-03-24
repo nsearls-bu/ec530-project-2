@@ -17,3 +17,20 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_USER=user
       - POSTGRES_DB=documents
+  redis:
+    image: redis:7.2.4-alpine
+    restart: always
+    ports:
+      - 6378:6379
+    command: redis-server --save 20 1 --loglevel warning
+    volumes:
+      - ./rpc_backend:/data
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: "rabbitmq"
+    ports:
+      - "5673:5672"
+      - "15672:15672"
+    volumes:
+      - ./rabbitmq/data/:/var/lib/rabbitmq/
+      - ./rabbitmq/log/:/var/log/rabbitmq

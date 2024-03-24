@@ -42,5 +42,4 @@ class Test_Users(FlaskTests):
 
         # Ensure the user is deleted
         response = self.client.get(f"/get_user?user_id={user_id}")
-        print(response.get_data())
         assert response.status_code == 404
