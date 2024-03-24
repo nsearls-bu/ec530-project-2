@@ -1,7 +1,9 @@
 '''API for reading responses and outputting data to users'''
 
+from uuid import UUID
 from flask import Blueprint, request
-from uuid import uuid4, UUID
+from flask_factory import get_session_engine
+
 output_bp = Blueprint('output_bp', __name__)
 
 

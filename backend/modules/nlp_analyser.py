@@ -3,6 +3,8 @@ from uuid import uuid4, UUID
 from flask import Blueprint, request
 
 analyser_bp = Blueprint('analyser_bp', __name__)
+
+
 @analyser_bp.route('/create_engine', methods=['PUT'])
 def create_engine_connection():
     '''
@@ -13,7 +15,7 @@ def create_engine_connection():
     writes to connection table in table
     '''
 
-    connection_name = request.args.get('name', type = str)
+    connection_name = request.args.get('name', type=str)
     url = request.args.get('url_name', type=str)
     connection_uid = uuid4()
 
@@ -23,7 +25,10 @@ def create_engine_connection():
         return res, 200
     return res, 400
 
+
 analyser_bp = Blueprint('analyser_bp', __name__)
+
+
 @analyser_bp.route('/remove_engine', methods=['PUT'])
 def remote_engine_connection(name, url):
     '''
@@ -40,6 +45,7 @@ def remote_engine_connection(name, url):
     if res is not None:
         return res, 204
     return res, 400
+
 
 @analyser_bp.route('/create_response', methods=['GET'])
 def create_response():
@@ -62,8 +68,8 @@ def create_response():
 
     document_text = 'QUERY document db with document id'
 
-
     # Input text fetched from document table
+
     def generate_summary(document_text):
         '''Uses prompt like "generate a summary of the following text"'''
     def title_summary(document_text):
@@ -78,9 +84,9 @@ def create_response():
         '''Crafts a google search based on a keywords, summary, and article title - returns web links'''
 
     res = 'write response with above generates to response db'
-    
+
     if res is not None:
-        return res,200
+        return res, 200
     return res, 500
 
 

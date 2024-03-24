@@ -34,7 +34,7 @@ def create_user():
 
 
 @user_management_bp.route('/get_user', methods=['GET'])
-def get_user(email, username, id):
+def get_user():
     '''
     Search or get user via user uid, username, email
     Returns 200 and user if user found
@@ -55,7 +55,7 @@ def get_user(email, username, id):
 
 
 @user_management_bp.route('/update_user', methods=['PUT'])
-def update_user(email, username, password, age, first_name, last_name):
+def update_user():
     '''
     Updates user data returns 201 if successfully updated
     '''
