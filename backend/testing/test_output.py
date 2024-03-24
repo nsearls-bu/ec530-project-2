@@ -1,28 +1,9 @@
-import unittest
-from ..flask_factory import create_flask_app
+from testing_setup import FlaskTests
 
 
-class FlaskBookshelfTests(unittest.TestCase): 
+class Test_Output(FlaskTests):
 
-    flask_app = None
 
-    @classmethod
-    def setUpClass(cls):
-        pass
-    @classmethod
-    def tearDownClass(cls):
-        pass
-
-    def setUp(self):
-            # creates a test client
-            self.flaskapp = create_flask_app()
-            # propagate the exceptions to the test client
-            self.flaskapp.testing = True
-
-    def tearDown(self):
-            pass
-
-    def test1(self):
-            result = self.flaskapp.get('/')
-
-            self.assertEqual(result.status_code, 200) 
+    def test_get_responses(self):
+        response = self.client.get("/get_responses", query_string={'user_id': 1, "document_id": 1})
+        assert response.status_code == 404
