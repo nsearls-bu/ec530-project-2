@@ -12,7 +12,7 @@ output_bp = Blueprint('output_bp', __name__)
 def read_responses():
     '''  returns:
      {
-         user_uid: uid,
+         user_id: uid,
          document_id : document_id
          title: title_summary()
          summary: generate_summary()
@@ -28,7 +28,7 @@ def read_responses():
     try:
         # Query the database for the response based on user_id and document_id
         response = session.query(NLP_Response).filter_by(
-            user_uid=user_id, document_id=document_id).first()
+            user_id=user_id, document_id=document_id).first()
 
         if response:
             # Construct the response dictionary

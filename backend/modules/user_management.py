@@ -28,11 +28,13 @@ def create_user():
     try:
         session = get_my_session()
         user = Users(username=username, firstname=first_name,
-                     last_name=last_name, email=email, age=age)
+                     lastname=last_name, email=email, age=age)
         session.add(user)
         session.commit()
+        session.refresh(user)
+
         if user:
-            return "successfully created user", 201
+            return {"user_id": user.user_id}, 201
         return "Unable to create user", 422
     except Exception as e:
         return f'Error reading responses: {str(e)}', 500
@@ -46,11 +48,11 @@ def get_user():
     Search or get user via user uid, username, email
     Returns 200 and user if user found
     '''
-    email = request.args.get(email, type=str)
-    username = request.args.get('username', type=str)
-    uid = request.args.get('uid', type=str)
 
     try:
+        email = request.args.get('email', type=UUID)
+        username = request.args.get('username', type=str)
+        user_id = request.args.get('user_id', type=str)
         session = get_my_session()
 
         if email or username:
@@ -67,11 +69,16 @@ def get_user():
                 # Query by username
                 query = session.query(Users).filter(
                     Users.username == username).first()
-            return query, 200  # Assign the query result to res
-        elif uid:
+            if query == None:
+                return 'User not found', 404
+            return query.as_dict(), 200  # Assign the query result to res
+        elif user_id:
             # Query by uid
-            query = session.query(Users).filter(Users.user_id == uid).first()
-            return query, 200
+            query = session.query(Users).filter(
+                Users.user_id == user_id).first()
+            if query == None:
+                return 'User not found', 404
+            return query.as_dict(), 200
         else:
             return 'Bad request', 400
     except Exception as e:
@@ -85,7 +92,7 @@ def update_user():
     '''
     Updates user data returns 201 if successfully updated
     '''
-    uid = request.args.get('uid', type=str)
+    user_id = request.args.get('user_id', type=str)
     email = request.args.get('email', type=str)
     username = request.args.get('username', type=str)
     age = request.args.get('age', type=int)
@@ -94,7 +101,7 @@ def update_user():
 
     try:
         session = get_my_session()
-        user = session.query(Users).filter_by(user_id=uid).first()
+        user = session.query(Users).filter_by(user_id=user_id).first()
         if not user:
             return 'User not found', 404
 
@@ -118,15 +125,15 @@ def delete_user():
     '''
     Deletes a user and deactivates their account
     '''
-    uid = request.args.get('uid', type=str)
+    user_id = request.args.get('user_id', type=str)
 
-    if not uid:
+    if not user_id:
         return 'User ID is required', 400
 
     session = get_my_session()
 
     try:
-        user = session.query(Users).filter_by(uid=uid).first()
+        user = session.query(Users).filter_by(user_id=user_id).first()
         if not user:
             return 'User not found', 404
 
