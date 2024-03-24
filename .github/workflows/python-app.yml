@@ -31,4 +31,5 @@ jobs:
     - name: Test with pytest
       run: |
         cd backend
+        export DB_STRING=postgresql://user:password@localhost:5436/documents
         python3 -m pytest -W ignore::DeprecationWarning
