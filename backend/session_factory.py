@@ -3,8 +3,10 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-def get_session_engine():
-    engine = create_engine(os.environ['DB_STRING'])
-    Session = sessionmaker(bind=engine)
 
-    return Session(), engine
+def get_session_engine():
+    '''Create a session and an engine, return both'''
+    engine = create_engine(os.environ['DB_STRING'])
+    session = sessionmaker(bind=engine)
+
+    return session(), engine

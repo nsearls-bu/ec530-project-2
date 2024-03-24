@@ -2,7 +2,8 @@
 
 from uuid import UUID
 from flask import Blueprint, request
-from flask_factory import get_session_engine
+
+# from flask_factory import get_session_engine
 
 output_bp = Blueprint('output_bp', __name__)
 

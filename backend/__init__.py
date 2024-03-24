@@ -1,16 +1,10 @@
+'''Start the program here'''
 from flask import Flask
-from modules.user_management import user_management_bp
-from modules.output import output_bp
-from modules.document_uploader import document_db
-from modules.nlp_analyser import analyser_bp
-
-
-
+from flask_factory import create_flask_app
 
 if __name__ == '__main__':
+    app = create_flask_app()
     app = Flask(__name__)
-    app.register_blueprint(user_management_bp)
-    app.register_blueprint(output_bp)
-    app.register_blueprint(document_db)
-    app.register_blueprint(analyser_bp)
+
+    app.run(port=4009)
     

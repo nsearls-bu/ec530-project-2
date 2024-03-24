@@ -1,5 +1,4 @@
 '''Generates a flask application and creates a connection engine for sql'''
-import os
 from flask import Flask
 from flask_cors import CORS
 from modules.user_management import user_management_bp
