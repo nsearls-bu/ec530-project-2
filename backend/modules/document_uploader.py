@@ -1,10 +1,24 @@
 '''This module manages uploading and ingestion of files/pdfs'''
-from uuid import uuid4, UUID
+from uuid import uuid4, uuid1
+from datetime import datetime
 from flask import Blueprint, request
-
+from modules.tables import Documents, Paragraphs
+from session_factory import get_my_session
 SIZE_LIMIT = 500  # sample size limit in megabytes
 
 document_db = Blueprint('document_db', __name__)
+
+
+def create_paragraph(text, document_id):
+    '''Creates paragraph in database'''
+    try:
+        session = get_my_session()
+        document = Paragraphs(document_id=document_id, text=text)
+        session.add(document)
+        session.commit()
+        return 'Response created successfully', 200
+    except Exception as e:
+        return f'Error creating response: {str(e)}', 500
 
 
 @document_db.route('/create_document')
@@ -31,18 +45,20 @@ def create_document():
             '''Scrapes html from url and generates text output'''
     def split_paragraphs():
         '''Splits paragraphs by AI or just analysis of newlines'''
-        pass
+        return ['hello', 'world']
 
-    def create_parsed_document(filename, read, filetype):
-        '''Write to document table
-        document_id : id,
-        full_text: {paragraph_1: paragraph_1_text ...}
-        '''
-        split_paragraphs()
-        res = 'WRITE TO DB'
-        return res
-    res = create_parsed_document(filename, read, filetype)
+    try:
+        session = get_my_session()
+        document = Documents(document_name=filename, uploaded_on=datetime.now(
+        ), filetype=filetype, fulltext=read)
+        session.add(document)
+        session.refresh(document)
 
-    if res is not None:
-        return res, 200
-    return 400
+        # Split fulltext into paragraphs and send each paragraph to the database
+        paragraphs = split_paragraphs()
+        for paragraph in paragraphs:
+            create_paragraph(paragraph, document.document_id)
+        session.commit()
+        return 'Response created successfully', 200
+    except Exception as e:
+        return f'Error creating response: {str(e)}', 500

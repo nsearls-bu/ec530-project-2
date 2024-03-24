@@ -37,6 +37,8 @@ class Documents(Base):
     document_id = Column("document_id", String, primary_key=True)
     user_id = Column("user_id", String, ForeignKey("USERS.user_id"))
     uploaded_on = Column("uploaded_on", DateTime)
+    document_name = Column("document_name", String)
+    filetype = Column("filetype", String)
     fulltext = Column("fulltext", String)
 
 

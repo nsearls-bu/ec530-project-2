@@ -1,9 +1,12 @@
 '''Does basic NLP analysis of text input'''
 from uuid import uuid4, UUID
 from flask import Blueprint, request
+from modules.tables import Connections, NLP_Response
+
 
 analyser_bp = Blueprint('analyser_bp', __name__)
 
+from session_factory import get_my_session
 
 @analyser_bp.route('/create_engine', methods=['PUT'])
 def create_engine_connection():
@@ -19,7 +22,13 @@ def create_engine_connection():
     url = request.args.get('url_name', type=str)
     connection_uid = uuid4()
 
-    res = 'CREATE NEW CONNECTION'
+    session = get_my_session()
+
+    new_connection = Connections(id=connection_uid, connection_name=connection_name, url=url)
+    session.add(new_connection)
+    session.commit()
+    res = session.refresh(new_connection)
+    session.close()
 
     if res is not None:
         return res, 200
@@ -38,13 +47,26 @@ def remote_engine_connection(name, url):
     connection_type: website API or other NLP processor}
     writes to connection table in table
     '''
-    uid = request.args.get('connection_uid', type=UUID)
+    connection_uid = request.args.get('connection_uid', type=UUID)
 
-    res = 'DELETE OLD CONNECTION'
+    if not connection_uid:
+        return 'Connection UID is required', 400
 
-    if res is not None:
-        return res, 204
-    return res, 400
+    try:
+        # Attempt to delete the connection from the database
+        session = get_my_session()  # Assuming you have the session created as shown in the previous example
+        connection = session.query(Connections).filter_by(id=connection_uid).first()
+
+        if connection:
+            # Using SQLAlchemy query to delete the connection
+            session.query(Connections).filter_by(id=connection_uid).delete()
+            session.commit()
+            session.close()
+            return 'Old connection deleted successfully', 204
+        else:
+            return 'Connection not found', 404
+    except Exception as e:
+        return f'Error deleting connection: {str(e)}', 500
 
 
 @analyser_bp.route('/create_response', methods=['GET'])
@@ -83,22 +105,27 @@ def create_response():
     def web_search():
         '''Crafts a google search based on a keywords, summary, and article title - returns web links'''
 
-    res = 'write response with above generates to response db'
+    # Perform analyses
+    title = title_summary(document_text)
+    summary = generate_summary(document_text)
+    sentiment = generate_sentiment(document_text)
+    keywords = keyword_analysis(document_text)
+    similar_articles = web_search()
 
-    if res is not None:
-        return res, 200
-    return res, 500
-
-
-@analyser_bp.route('/search_document', methods=['GET'])
-def search_document():
-    '''Searches documents and returns paragraph ID of document that best fits keyword'''
-    user_id = request.args.get('user_id', type=UUID)
-    document_id = request.args.get('document_id', type=UUID)
-    keyword = request.args.get('keyword', type=str)
-
-    res = 'QUERY document db with filter'
-
-    if res is not None:
-        return res, 200
-    return None, 404
+    # Write the response to the database
+    try:
+        session = get_my_session()
+        response = NLP_Response(
+            user_uid=uid,
+            document_id=document_id,
+            title=title,
+            summary=summary,
+            sentiment=sentiment,
+            keywords=keywords,
+            similar_articles=similar_articles
+        )
+        session.add(response)
+        session.commit()
+        return 'Response created successfully', 200
+    except Exception as e:
+        return f'Error creating response: {str(e)}', 500
