@@ -94,24 +94,38 @@ def create_response():
 
     def generate_summary(document_text):
         '''Uses prompt like "generate a summary of the following text"'''
+        return None
     def title_summary(document_text):
         '''Generate a single sentence summary'''
+        return None
+
     def generate_sentiment(document_text):
         '''Uses prompt like "Assess the overall sentiment of the following text on a scale of 1-5 where 1 is most negative and 5 is most positive"'''
+        return None
+
     def keyword_analysis(document_text):
         '''Uses prompt like "Generate 15 keywords from the following text with definitions as key-pairs in a json'''
+        return None
+
     def proper_noun_analysis(document_text):
         '''Record every proper noun in this document and output a list of names,locations, institutions, and addresses'''
+        return None
+
     def web_search():
         '''Crafts a google search based on a keywords, summary, and article title - returns web links'''
+        return None
 
     # Perform analyses
-    title = title_summary(document_text)
-    summary = generate_summary(document_text)
-    sentiment = generate_sentiment(document_text)
-    keywords = keyword_analysis(document_text)
-    similar_articles = web_search()
-
+    # title = title_summary(document_text)
+    # summary = generate_summary(document_text)
+    # sentiment = generate_sentiment(document_text)
+    # keywords = keyword_analysis(document_text)
+    # similar_articles = web_search()
+    title = None
+    summary = None
+    sentiment = None
+    keywords = None
+    similar_articles = None
     # Write the response to the database
     try:
         session = get_my_session()
