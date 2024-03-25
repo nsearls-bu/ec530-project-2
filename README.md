@@ -1,7 +1,7 @@
 
 # BU EC530 NLP Analyzer Project 2
 
-Welcome to the repository for Project 2 of BU EC530's NLP Analyzer project! This repository contains the stub builds of APIs designed to connect to a PostgreSQL database. Follow the instructions below to set up the API backend using Docker Compose.
+This repository contains the stub builds of APIs designed to connect to a PostgreSQL database. Follow the instructions below to set up the API backend using Docker Compose.
 
 ## Instructions
 
