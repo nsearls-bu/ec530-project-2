@@ -1,5 +1,5 @@
 version: "3.1"
-name: neurogpt
+name: project2
 services:
   back-end: 
     image: nedsearls/ec530-bu:backend.latest
@@ -7,6 +7,9 @@ services:
       context: backend
     ports:
       - 4009:4009
+    env_file:
+      - backend/.env
+    command: python __init__.py
   postgres:
     image: postgres:14-alpine
     ports:
@@ -34,3 +37,13 @@ services:
     volumes:
       - ./rabbitmq/data/:/var/lib/rabbitmq/
       - ./rabbitmq/log/:/var/log/rabbitmq
+  worker:
+    image: nedsearls/ec530-bu:worker.latest
+    build:
+      context: backend/task_queue
+  test:
+    image: nedsearls/ec530-bu:backend.latest
+    env_file:
+      - backend/.env
+    command: python3 -m pytest -W ignore::DeprecationWarning
+    
