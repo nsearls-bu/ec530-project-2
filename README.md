@@ -8,4 +8,4 @@ Run compose file with docker compose up -d after building to start API backend.
 Docker images are stored in my docker repository nedsearls/ec530-bu
 Run docker logs project2-test-1 to view output of log file.
 
-![alt text](http://url/to/img.png)
+![alt text](Screenshot 2024-03-24 at 8.05.06 PM.png)
