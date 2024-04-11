@@ -10,6 +10,9 @@ services:
     env_file:
       - backend/.env
     command: python __init__.py
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
   postgres:
     image: postgres:14-alpine
     ports:
@@ -34,6 +37,11 @@ services:
     ports:
       - "5673:5672"
       - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
     volumes:
       - ./rabbitmq/data/:/var/lib/rabbitmq/
       - ./rabbitmq/log/:/var/log/rabbitmq
@@ -41,9 +49,19 @@ services:
     image: nedsearls/ec530-bu:worker.latest
     build:
       context: backend/task_queue
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      back-end:
+        condition: service_started
   test:
     image: nedsearls/ec530-bu:backend.latest
     env_file:
       - backend/.env
     command: python3 -m pytest -W ignore::DeprecationWarning
+    depends_on:
+      worker:
+        condition: service_started
+      back-end:
+        condition: service_started   
     

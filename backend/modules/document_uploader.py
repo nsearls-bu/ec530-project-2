@@ -44,7 +44,6 @@ def create_document():
     def split_paragraphs():
         '''Splits paragraphs by AI or just analysis of newlines'''
         return ['hello', 'world']
-    print(read.decode())
     try:
         session = get_my_session()
         document = Documents(document_name=filename, uploaded_on=datetime.now(
